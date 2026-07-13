@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>خطوة عمياء</title>
+<style>
+  :root{
+    --bg:#0a0a0a;
+    --panel:#161616;
+    --panel2:#1f1f1f;
+    --line:#2e2e2e;
+    --black:#f2f2f2;
+    --gray:#c7c7c7;
+    --muted:#8a8a8e;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Segoe UI', Tahoma, Arial, sans-serif;
+    background:var(--bg);
+    color:var(--black);
+    min-height:100vh;
+    padding:24px;
+  }
+  .wrap{
+    max-width:720px;
+    margin:0 auto;
+  }
+  header{
+    text-align:center;
+    margin-bottom:32px;
+    padding-bottom:20px;
+    border-bottom:1px solid var(--line);
+  }
+  header h1{
+    font-size:1.9rem;
+    margin:0 0 6px;
+    letter-spacing:.5px;
+    font-weight:700;
+  }
+  header p{
+    color:var(--muted);
+    margin:0;
+    font-size:.92rem;
+  }
+  .tabs{
+    display:flex;
+    gap:8px;
+    margin-bottom:20px;
+    flex-wrap:wrap;
+    justify-content:center;
+  }
+  .tab-btn{
+    background:var(--panel);
+    border:1px solid var(--line);
+    color:var(--gray);
+    padding:10px 16px;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:.88rem;
+    transition:.15s;
+    font-weight:500;
+  }
+  .tab-btn:hover{
+    border-color:var(--black);
+  }
+  .tab-btn.active{
+    background:var(--black);
+    color:#0a0a0a;
+    border-color:var(--black);
+  }
+  .card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:28px;
+    margin-bottom:20px;
+    display:none;
+  }
+  .card.active{display:block;}
+  .card h2{
+    margin-top:0;
+    font-size:1.15rem;
+    font-weight:700;
+  }
+  .card .desc{
+    color:var(--muted);
+    font-size:.86rem;
+    margin-bottom:22px;
+    line-height:1.7;
+  }
+
+  /* Timer */
+  .timer-display{
+    font-size:3.6rem;
+    text-align:center;
+    font-weight:700;
+    margin:10px 0 20px;
+    color:var(--black);
+    letter-spacing:1px;
+    font-variant-numeric:tabular-nums;
+  }
+  .task-input{
+    width:100%;
+    padding:12px 14px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:var(--panel2);
+    color:var(--black);
+    font-size:1rem;
+    margin-bottom:16px;
+  }
+  .task-input:focus, textarea:focus, .task-slot:focus{
+    outline:none;
+    border-color:var(--black);
+  }
+  .btn{
+    display:inline-block;
+    padding:13px 22px;
+    border-radius:8px;
+    border:1px solid var(--black);
+    font-size:.95rem;
+    font-weight:600;
+    cursor:pointer;
+    transition:.15s;
+    width:100%;
+  }
+  .btn:active{transform:scale(.98);}
+  .btn-main{background:var(--black); color:#0a0a0a;}
+  .btn-main:hover{background:#d8d8d8;}
+  .btn-main:disabled{background:var(--muted); border-color:var(--muted); cursor:not-allowed;}
+  .btn-secondary{background:var(--panel); color:var(--black); border:1px solid var(--line);}
+  .btn-secondary:hover{border-color:var(--black);}
+  .btn-row{display:flex; gap:10px;}
+  .btn-row .btn{width:auto; flex:1;}
+  .timer-msg{
+    text-align:center;
+    color:var(--gray);
+    font-size:.9rem;
+    min-height:20px;
+    margin-bottom:10px;
+  }
+
+  /* Brain dump */
+  textarea{
+    width:100%;
+    min-height:220px;
+    resize:vertical;
+    padding:16px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:var(--panel2);
+    color:var(--black);
+    font-size:1rem;
+    line-height:1.6;
+    font-family:inherit;
+  }
+  .dump-timer{
+    text-align:center;
+    font-size:1.5rem;
+    font-weight:700;
+    color:var(--black);
+    margin:14px 0;
+    font-variant-numeric:tabular-nums;
+  }
+  .dump-controls{display:flex; gap:10px; margin-top:14px;}
+  .dump-controls .btn{width:auto; flex:1;}
+
+  /* Done counter */
+  .done-input-row{display:flex; gap:10px; margin-bottom:18px;}
+  .done-input-row input{
+    flex:1;
+    padding:12px 14px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:var(--panel2);
+    color:var(--black);
+    font-size:1rem;
+  }
+  .done-input-row button{
+    padding:12px 20px;
+    border-radius:8px;
+    border:1px solid var(--black);
+    background:var(--black);
+    color:#0a0a0a;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .done-input-row button:hover{background:#d8d8d8;}
+  .counter-big{
+    text-align:center;
+    font-size:2.8rem;
+    font-weight:800;
+    color:var(--black);
+  }
+  .counter-label{
+    text-align:center;
+    color:var(--muted);
+    margin-bottom:20px;
+    font-size:.88rem;
+  }
+  .done-list{
+    list-style:none;
+    padding:0;
+    margin:0;
+    max-height:220px;
+    overflow-y:auto;
+  }
+  .done-list li{
+    background:var(--panel2);
+    border:1px solid var(--line);
+    padding:10px 14px;
+    border-radius:8px;
+    margin-bottom:8px;
+    font-size:.9rem;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+  .done-list li span.time{color:var(--muted); font-size:.76rem;}
+
+  /* Random mode */
+  .task-slot{
+    width:100%;
+    padding:12px 14px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:var(--panel2);
+    color:var(--black);
+    font-size:1rem;
+    margin-bottom:10px;
+  }
+  .chosen-box{
+    text-align:center;
+    padding:22px;
+    border-radius:10px;
+    background:var(--black);
+    margin:18px 0;
+    display:none;
+  }
+  .chosen-box.show{display:block;}
+  .chosen-box .label{color:#555555; font-size:.82rem; margin-bottom:8px;}
+  .chosen-box .task{font-size:1.3rem; font-weight:700; color:#0a0a0a;}
+
+  /* Streak badge */
+  .streak-badge{
+    display:inline-block;
+    margin-top:14px;
+    padding:6px 16px;
+    border:1px solid var(--line);
+    border-radius:999px;
+    font-size:.82rem;
+    color:var(--gray);
+    background:var(--panel);
+  }
+  .streak-badge b{color:var(--black); font-weight:700;}
+
+  /* Achievements */
+  .week-dots{display:flex; gap:8px; justify-content:center; margin:18px 0 22px; flex-wrap:wrap;}
+  .week-dot{
+    width:36px; height:36px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center;
+    font-size:.78rem;
+    color:var(--muted);
+    background:var(--panel2);
+  }
+  .week-dot.active{background:var(--black); color:#0a0a0a; border-color:var(--black); font-weight:700;}
+  .week-dot.today{border-color:var(--black);}
+  .stats-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;}
+  .stat-box{background:var(--panel2); border:1px solid var(--line); border-radius:10px; padding:16px; text-align:center;}
+  .stat-box .num{font-size:1.6rem; font-weight:800; color:var(--black);}
+  .stat-box .lbl{font-size:.76rem; color:var(--muted); margin-top:4px;}
+  .motivate-msg{
+    text-align:center;
+    padding:16px;
+    border-radius:10px;
+    background:var(--black);
+    color:#0a0a0a;
+    font-weight:600;
+    font-size:.92rem;
+    line-height:1.7;
+  }
+
+  /* Gallery */
+  .gallery-section-title{
+    font-weight:700;
+    font-size:.95rem;
+    margin:26px 0 4px;
+    padding-top:22px;
+    border-top:1px solid var(--line);
+  }
+  .gallery-box{
+    background:var(--panel2);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:20px;
+    text-align:center;
+    margin:14px 0 16px;
+    min-height:60px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+  }
+  .gallery-box .g-text{font-weight:700; color:var(--black); font-size:1rem; line-height:1.6;}
+  .gallery-box .g-date{color:var(--muted); font-size:.78rem;}
+
+  /* Reminders */
+  .reminder-time-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:var(--panel2);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:10px 14px;
+    margin-bottom:8px;
+    font-size:.92rem;
+    font-variant-numeric:tabular-nums;
+  }
+  .reminder-time-item button{
+    background:transparent;
+    border:1px solid var(--line);
+    color:var(--muted);
+    border-radius:6px;
+    padding:6px 12px;
+    cursor:pointer;
+    font-size:.8rem;
+  }
+  .reminder-time-item button:hover{border-color:var(--black); color:var(--black);}
+  .reminder-add-row{display:flex; gap:10px; margin-top:14px;}
+  .reminder-add-row input[type="time"]{
+    flex:1;
+    padding:12px 14px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:var(--panel2);
+    color:var(--black);
+    font-size:1rem;
+  }
+  .reminder-add-row button{
+    padding:12px 18px;
+    border-radius:8px;
+    border:1px solid var(--black);
+    background:var(--black);
+    color:#0a0a0a;
+    font-weight:600;
+    cursor:pointer;
+    width:auto;
+  }
+
+  /* Reframe */
+  .reframe-q{font-weight:600; margin-bottom:12px; font-size:.98rem; line-height:1.7;}
+  .reframe-summary{
+    background:var(--panel2);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:10px 14px;
+    margin-bottom:18px;
+    font-size:.83rem;
+    color:var(--muted);
+  }
+  .reframe-choice{flex:1;}
+  .reframe-choice.selected{background:var(--black); color:#0a0a0a; border-color:var(--black);}
+
+  .celebrate{
+    position:fixed;
+    inset:0;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    background:rgba(0,0,0,.94);
+    z-index:99;
+    text-align:center;
+    flex-direction:column;
+  }
+  .celebrate.show{display:flex;}
+  .celebrate .big{font-size:2.6rem; margin-bottom:10px; color:#ffffff;}
+  .celebrate p{color:#dddddd; margin:0 0 20px; font-size:1rem;}
+
+  /* Time log modal */
+  .timelog-modal{
+    position:fixed;
+    inset:0;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    background:rgba(0,0,0,.94);
+    z-index:100;
+    padding:20px;
+  }
+  .timelog-modal.show{display:flex;}
+  .timelog-box{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:26px;
+    max-width:380px;
+    width:100%;
+    text-align:center;
+  }
+  .tl-title{font-size:1.1rem; font-weight:700; margin-bottom:6px;}
+  .tl-task{color:var(--muted); font-size:.85rem; margin-bottom:16px;}
+  .tl-clock{width:150px; height:150px; margin:0 auto 18px; display:block;}
+  .tl-clock-face{fill:var(--panel2); stroke:var(--line); stroke-width:2;}
+  .tl-tick{stroke:var(--gray); stroke-width:2;}
+  .tl-hand{stroke:var(--black); stroke-linecap:round;}
+  .tl-hour-hand{stroke-width:5;}
+  .tl-minute-hand{stroke-width:3;}
+  .tl-center{fill:var(--black);}
+  .tl-times{display:flex; gap:12px; margin-bottom:16px;}
+  .tl-time-box{flex:1; background:var(--panel2); border:1px solid var(--line); border-radius:8px; padding:10px;}
+  .tl-lbl{display:block; font-size:.72rem; color:var(--muted); margin-bottom:4px;}
+  .tl-val{font-weight:700; font-size:1rem; font-variant-numeric:tabular-nums;}
+  .tl-time-box input[type="time"]{
+    width:100%;
+    border:none;
+    background:transparent;
+    color:var(--black);
+    font-size:1rem;
+    font-weight:700;
+    text-align:center;
+    font-variant-numeric:tabular-nums;
+  }
+  .tl-time-box input[type="time"]:focus{outline:none;}
+  .tl-categories{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:4px 0 16px;}
+  .tl-chip{
+    padding:8px 16px;
+    border-radius:999px;
+    border:1px solid var(--line);
+    background:var(--panel2);
+    color:var(--gray);
+    font-size:.83rem;
+    cursor:pointer;
+  }
+  .tl-chip.selected{background:var(--black); color:#0a0a0a; border-color:var(--black); font-weight:700;}
+  .tl-chip.tl-chip-add{border-style:dashed; color:var(--muted);}
+  .tl-new-category-row{display:flex; gap:8px; margin-bottom:16px;}
+  .tl-new-category-row input{
+    flex:1;
+    padding:10px 12px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:var(--panel2);
+    color:var(--black);
+    font-size:.9rem;
+  }
+  .tl-new-category-row button{
+    padding:10px 16px;
+    border-radius:8px;
+    border:1px solid var(--black);
+    background:var(--black);
+    color:#0a0a0a;
+    font-weight:600;
+    cursor:pointer;
+    width:auto;
+  }
+  .tl-cancel{
+    display:inline-block;
+    margin-top:14px;
+    color:var(--muted);
+    font-size:.8rem;
+    background:none;
+    border:none;
+    cursor:pointer;
+    text-decoration:underline;
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <h1>خطوة عمياء</h1>
+    <p>البدء بأسوأ شكل ممكن — الكمال ينتظر لاحقًا</p>
+    <div class="streak-badge" id="streakBadge">الستريك الحالي: <b id="streakNum">0</b> يوم متتالي</div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="timer">مؤقت 5 دقائق</button>
+    <button class="tab-btn" data-tab="dump">تفريغ الأفكار</button>
+    <button class="tab-btn" data-tab="done">إنجاز اليوم</button>
+    <button class="tab-btn" data-tab="random">اختيار عشوائي</button>
+    <button class="tab-btn" data-tab="achievements">لوحة الإنجازات</button>
+    <button class="tab-btn" data-tab="reframe">إعادة الصياغة</button>
+    <button class="tab-btn" data-tab="reminders">التذكيرات</button>
+    <button class="tab-btn" data-tab="timelog">سجل الوقت</button>
+  </div>
+
+  <!-- Timer -->
+  <div class="card active" id="timer">
+    <h2>مؤقت الـ 5 دقائق</h2>
+    <p class="desc">اكتب المهمة، اضغط بدء، واعمل عليها لمدة 5 دقائق فقط، بشكل سيئ إن لزم الأمر. لا حكم على النتيجة.</p>
+    <input type="text" class="task-input" id="timerTask" placeholder="ما هي المهمة؟ (اختياري)">
+    <div class="timer-display" id="timerDisplay">05:00</div>
+    <div class="timer-msg" id="timerMsg"></div>
+    <div class="btn-row">
+      <button class="btn btn-main" id="startTimerBtn">بدء الآن</button>
+      <button class="btn btn-secondary" id="resetTimerBtn">إعادة</button>
+    </div>
+  </div>
+
+  <!-- Brain dump -->
+  <div class="card" id="dump">
+    <h2>لوحة التفريغ</h2>
+    <p class="desc">اكتب كل ما في الذهن دون تدقيق أو تعديل. النص يُمسح تلقائيًا بعد 10 دقائق — لا وقت للتفكير الزائد.</p>
+    <div class="dump-timer" id="dumpTimer">10:00</div>
+    <textarea id="dumpArea" placeholder="ابدأ الكتابة هنا فورًا..."></textarea>
+    <div class="dump-controls">
+      <button class="btn btn-main" id="startDumpBtn">بدء التفريغ</button>
+      <button class="btn btn-secondary" id="clearDumpBtn">مسح الآن</button>
+    </div>
+  </div>
+
+  <!-- Done counter -->
+  <div class="card" id="done">
+    <h2>أُنجز بشكل مقبول</h2>
+    <p class="desc">سجّل مهمة صغيرة أو تافهة تم إنجازها اليوم. لا تفاصيل، لا تقييم جودة — فقط تسجيل أنها حدثت.</p>
+    <div class="counter-big" id="doneCount">0</div>
+    <div class="counter-label">إنجاز اليوم</div>
+    <div class="done-input-row">
+      <input type="text" id="doneInput" placeholder="مثال: الرد على رسالة، ترتيب الطاولة...">
+      <button id="doneAddBtn">تم</button>
+    </div>
+    <ul class="done-list" id="doneList"></ul>
+  </div>
+
+  <!-- Random -->
+  <div class="card" id="random">
+    <h2>الوضع العشوائي للفعل</h2>
+    <p class="desc">تردد بين عدة مهام؟ أدخل حتى 3، والتطبيق يختار واحدة عشوائيًا ويشغل المؤقت فورًا. لا رفاهية للتردد.</p>
+    <input type="text" class="task-slot" id="slot1" placeholder="المهمة 1">
+    <input type="text" class="task-slot" id="slot2" placeholder="المهمة 2">
+    <input type="text" class="task-slot" id="slot3" placeholder="المهمة 3">
+    <button class="btn btn-main" id="pickRandomBtn">اختيار عشوائي والبدء</button>
+    <div class="chosen-box" id="chosenBox">
+      <div class="label">القرار محسوم، لا نقاش:</div>
+      <div class="task" id="chosenTask"></div>
+    </div>
+    <div class="timer-display" id="randomTimerDisplay" style="display:none;">05:00</div>
+    <div class="btn-row" id="randomTimerControls" style="display:none;">
+      <button class="btn btn-secondary" id="resetRandomBtn">إعادة</button>
+    </div>
+  </div>
+
+  <!-- Achievements -->
+  <div class="card" id="achievements">
+    <h2>لوحة الإنجازات الأسبوعية</h2>
+    <p class="desc">ملخص آخر 7 أيام. الهدف هو الاستمرار، وليس أداء مثالي كل يوم.</p>
+    <div class="week-dots" id="weekDots"></div>
+    <div class="stats-grid">
+      <div class="stat-box"><div class="num" id="statActiveDays">0</div><div class="lbl">أيام نشطة من 7</div></div>
+      <div class="stat-box"><div class="num" id="statDoneCount">0</div><div class="lbl">إنجازات هذا الأسبوع</div></div>
+      <div class="stat-box"><div class="num" id="statCurrentStreak">0</div><div class="lbl">الستريك الحالي</div></div>
+      <div class="stat-box"><div class="num" id="statLongestStreak">0</div><div class="lbl">أطول ستريك</div></div>
+    </div>
+    <div class="motivate-msg" id="motivateMsg"></div>
+
+    <div class="gallery-section-title">إنجاز عشوائي من الماضي</div>
+    <div class="gallery-box" id="galleryBox"></div>
+    <button class="btn btn-secondary" id="galleryShuffle">إنجاز آخر</button>
+  </div>
+
+  <!-- Reframe -->
+  <div class="card" id="reframe">
+    <h2>إعادة صياغة الأفكار السلبية</h2>
+    <p class="desc">ثلاثة أسئلة سريعة لكسر حلقة التفكير الزائد، تنتهي بربط الخطوة مباشرة بمؤقت الـ5 دقائق.</p>
+
+    <div class="reframe-step" id="reframeStep1">
+      <div class="reframe-q">١. ما أسوأ شيء يمكن أن يحدث لو قُدّم هذا العمل بشكله الحالي؟</div>
+      <input type="text" class="task-input" id="reframeA1" placeholder="إجابة قصيرة...">
+      <button class="btn btn-main" id="reframeNext1">التالي</button>
+    </div>
+
+    <div class="reframe-step" id="reframeStep2" style="display:none;">
+      <div class="reframe-summary" id="reframeSummary1"></div>
+      <div class="reframe-q">٢. لو حدث ذلك فعلاً، هل يمكن التعامل معه؟</div>
+      <div class="btn-row">
+        <button class="btn btn-secondary reframe-choice" data-choice="نعم">نعم</button>
+        <button class="btn btn-secondary reframe-choice" data-choice="إلى حد ما">إلى حد ما</button>
+        <button class="btn btn-secondary reframe-choice" data-choice="غير متأكد">غير متأكد</button>
+      </div>
+    </div>
+
+    <div class="reframe-step" id="reframeStep3" style="display:none;">
+      <div class="reframe-summary" id="reframeSummary2"></div>
+      <div class="reframe-q">٣. ما أول خطوة صغيرة يمكن القيام بها الآن، بدل التفكير بالنتيجة الكاملة؟</div>
+      <input type="text" class="task-input" id="reframeA3" placeholder="خطوة صغيرة وبسيطة...">
+      <button class="btn btn-main" id="reframeFinish">ربط الخطوة بمؤقت 5 دقائق</button>
+    </div>
+  </div>
+
+  <!-- Reminders -->
+  <div class="card" id="reminders">
+    <h2>التذكيرات</h2>
+    <p class="desc">إشعارات من المتصفح في أوقات تُحدَّد يدويًا، بدل الاعتماد على التذكر الذاتي. يمكن إضافة أكثر من وقت في اليوم. ملاحظة: تعمل هذه التذكيرات فقط أثناء بقاء هذه الصفحة مفتوحة في المتصفح.</p>
+    <button class="btn btn-main" id="enableNotifBtn">تفعيل إشعارات المتصفح</button>
+    <div class="timer-msg" id="notifStatus"></div>
+    <div id="reminderTimesList"></div>
+    <div class="reminder-add-row">
+      <input type="time" id="newReminderTime">
+      <button id="addReminderBtn">إضافة</button>
+    </div>
+  </div>
+
+  <!-- Time log -->
+  <div class="card" id="timelog">
+    <h2>سجل الوقت حسب الفئة</h2>
+    <p class="desc">مجموع الوقت المسجَّل من مؤقت 5 دقائق والاختيار العشوائي، مصنَّف تلقائيًا حسب كلمات وصف المهمة (مثل: قراءة/كتاب، رياضة/مشي/حديد).</p>
+    <div class="stats-grid" id="categoryStats"></div>
+  </div>
+</div>
+
+<div class="celebrate" id="celebrate">
+  <div class="big">✓</div>
+  <p id="celebrateText">تم إنجاز الخطوة.</p>
+  <button class="btn btn-main" style="width:auto; padding:12px 30px; background:#ffffff; color:#111111; border-color:#ffffff;" id="closeCelebrate">استمرار</button>
+</div>
+
+<div class="timelog-modal" id="timelogModal">
+  <div class="timelog-box">
+    <div class="tl-title">كم استغرقت فعليًا؟</div>
+    <div class="tl-task" id="tlTaskLabel"></div>
+    <svg class="tl-clock" viewBox="0 0 200 200">
+      <circle cx="100" cy="100" r="94" class="tl-clock-face"/>
+      <g id="tlTicks"></g>
+      <line id="tlHourHand" class="tl-hand tl-hour-hand" x1="100" y1="100" x2="100" y2="65"/>
+      <line id="tlMinuteHand" class="tl-hand tl-minute-hand" x1="100" y1="100" x2="100" y2="40"/>
+      <circle cx="100" cy="100" r="5" class="tl-center"/>
+    </svg>
+    <div class="tl-times">
+      <div class="tl-time-box">
+        <span class="tl-lbl">بدأت</span>
+        <span class="tl-val" id="tlStartVal">--:--</span>
+      </div>
+      <div class="tl-time-box">
+        <span class="tl-lbl">انتهيت</span>
+        <input type="time" id="tlEndTime">
+      </div>
+    </div>
+    <div class="tl-categories" id="tlCategories"></div>
+    <div class="tl-new-category-row" id="tlNewCategoryRow" style="display:none;">
+      <input type="text" id="tlNewCategoryInput" placeholder="اسم الفئة الجديدة...">
+      <button id="tlConfirmNewCategoryBtn">إضافة</button>
+    </div>
+    <input type="text" id="tlCustomCategory" class="task-input" placeholder="اسم الفئة..." style="display:none;">
+    <div class="btn-row">
+      <button class="btn btn-secondary" id="tlSkipBtn">تخطي وتسجيل 5 دقائق</button>
+      <button class="btn btn-main" id="tlSaveBtn">حفظ الوقت الفعلي</button>
+    </div>
+    <button class="tl-cancel" id="tlCancelBtn">إلغاء بدون تسجيل</button>
+  </div>
+</div>
+
+<script>
+// ---------- Persistence & streak ----------
+const STORAGE_KEY = 'khatwaAmyaData';
+
+function getDateStr(d = new Date()){
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+function addDays(d, n){ const r = new Date(d); r.setDate(r.getDate()+n); return r; }
+
+function loadData(){
+  let data;
+  try{
+    data = JSON.parse(localStorage.getItem(STORAGE_KEY));
+  }catch(e){ data = null; }
+  if(!data){
+    data = {
+      streak: { current: 0, longest: 0, lastActiveDate: null },
+      daily: {},
+      doneToday: [],
+      doneTodayDate: getDateStr()
+    };
+  }
+  if(!data.doneLog) data.doneLog = [];
+  if(!data.reminders) data.reminders = { enabled:false, times:[], firedDate: getDateStr(), firedTimes: [] };
+  if(!data.timeLog) data.timeLog = [];
+  if(!data.customCategories) data.customCategories = [];
+  const today = getDateStr();
+  if(data.doneTodayDate !== today){
+    data.doneToday = [];
+    data.doneTodayDate = today;
+  }
+  return data;
+}
+
+function saveData(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+}
+
+let appData = loadData();
+
+function getDisplayStreak(){
+  const today = getDateStr();
+  const yesterday = getDateStr(addDays(new Date(), -1));
+  if(appData.streak.lastActiveDate === today || appData.streak.lastActiveDate === yesterday){
+    return appData.streak.current;
+  }
+  return 0;
+}
+
+function recordActivity(kind){
+  const today = getDateStr();
+  if(!appData.daily[today]) appData.daily[today] = { active:false, doneCount:0 };
+  appData.daily[today].active = true;
+  if(kind === 'done') appData.daily[today].doneCount += 1;
+
+  if(appData.streak.lastActiveDate !== today){
+    const yesterday = getDateStr(addDays(new Date(), -1));
+    if(appData.streak.lastActiveDate === yesterday){
+      appData.streak.current += 1;
+    } else {
+      appData.streak.current = 1;
+    }
+    appData.streak.lastActiveDate = today;
+    if(appData.streak.current > appData.streak.longest){
+      appData.streak.longest = appData.streak.current;
+    }
+  }
+  saveData();
+  renderStreakBadge();
+  renderAchievements();
+}
+
+function renderStreakBadge(){
+  document.getElementById('streakNum').textContent = getDisplayStreak();
+}
+
+function renderAchievements(){
+  const today = new Date();
+  const dotsEl = document.getElementById('weekDots');
+  dotsEl.innerHTML = '';
+  let activeDays = 0;
+  let weekDoneCount = 0;
+  for(let i=6; i>=0; i--){
+    const d = addDays(today, -i);
+    const key = getDateStr(d);
+    const entry = appData.daily[key];
+    const isActive = !!(entry && entry.active);
+    if(isActive) activeDays++;
+    if(entry) weekDoneCount += entry.doneCount || 0;
+    const dot = document.createElement('div');
+    dot.className = 'week-dot' + (isActive ? ' active' : '') + (i===0 ? ' today' : '');
+    dot.textContent = d.getDate();
+    dotsEl.appendChild(dot);
+  }
+
+  document.getElementById('statActiveDays').textContent = activeDays;
+  document.getElementById('statDoneCount').textContent = weekDoneCount;
+  document.getElementById('statCurrentStreak').textContent = getDisplayStreak();
+  document.getElementById('statLongestStreak').textContent = appData.streak.longest;
+
+  let msg;
+  if(activeDays === 0){
+    msg = 'الأسبوع لم يبدأ بعد. أي خطوة الآن، مهما كانت صغيرة، تكفي كبداية.';
+  } else if(activeDays <= 2){
+    msg = 'بداية فعلية أفضل من خطة مثالية لم تبدأ بعد. الاستمرار أهم من الكمال.';
+  } else if(activeDays <= 4){
+    msg = 'اتساق حقيقي يتكوّن هنا. نصف الأسبوع تقريبًا فيه فعل، وهذا يُبنى عليه.';
+  } else if(activeDays <= 6){
+    msg = 'أسبوع شبه مكتمل بالفعل لا بالانتظار. هذا هو المطلوب بالضبط.';
+  } else {
+    msg = 'أسبوع كامل من الفعل، بغض النظر عن جودة كل يوم. هذا ما يكسر الكمالية فعليًا.';
+  }
+  document.getElementById('motivateMsg').textContent = msg;
+}
+
+// ---------- Tabs ----------
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.card').forEach(c=>c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+  });
+});
+
+function showCelebrate(text){
+  document.getElementById('celebrateText').textContent = text;
+  document.getElementById('celebrate').classList.add('show');
+}
+document.getElementById('closeCelebrate').addEventListener('click', ()=>{
+  document.getElementById('celebrate').classList.remove('show');
+});
+
+function beep(){
+  try{
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.type='sine'; o.frequency.value=880;
+    g.gain.setValueAtTime(0.15, ctx.currentTime);
+    o.start();
+    o.stop(ctx.currentTime + 0.4);
+  }catch(e){}
+}
+
+// ---------- 5-minute timer ----------
+let timerInterval = null;
+const timerDisplay = document.getElementById('timerDisplay');
+const timerMsg = document.getElementById('timerMsg');
+const startTimerBtn = document.getElementById('startTimerBtn');
+
+function formatTime(s){
+  const m = Math.floor(s/60).toString().padStart(2,'0');
+  const sec = (s%60).toString().padStart(2,'0');
+  return `${m}:${sec}`;
+}
+
+let activeTimerEnd = null;
+let activeTimerOnDone = null;
+let activeTimerDisplay = null;
+let activeTimerCompleted = true;
+
+function startTimer(seconds, displayEl, onDone, msgEl){
+  clearInterval(timerInterval);
+  activeTimerEnd = Date.now() + seconds * 1000;
+  activeTimerOnDone = onDone;
+  activeTimerDisplay = displayEl;
+  activeTimerCompleted = false;
+  displayEl.textContent = formatTime(seconds);
+  if(msgEl) msgEl.textContent = 'العمل فقط. بلا تفكير زائد.';
+  timerInterval = setInterval(tickActiveTimer, 1000);
+}
+
+function tickActiveTimer(){
+  if(activeTimerCompleted || !activeTimerEnd) return;
+  const remaining = Math.max(0, Math.round((activeTimerEnd - Date.now()) / 1000));
+  activeTimerDisplay.textContent = formatTime(remaining);
+  if(remaining <= 0){
+    activeTimerCompleted = true;
+    clearInterval(timerInterval);
+    beep();
+    activeTimerOnDone();
+  }
+}
+
+document.addEventListener('visibilitychange', ()=>{
+  if(!document.hidden){
+    tickActiveTimer();
+  }
+});
+
+startTimerBtn.addEventListener('click', ()=>{
+  const task = document.getElementById('timerTask').value.trim();
+  const startedAt = new Date();
+  startTimerBtn.disabled = true;
+  startTimer(5*60, timerDisplay, ()=>{
+    timerMsg.textContent = 'انتهت الـ 5 دقائق.';
+    startTimerBtn.disabled = false;
+    openTimeLogModal(task, startedAt);
+  }, timerMsg);
+});
+
+document.getElementById('resetTimerBtn').addEventListener('click', ()=>{
+  clearInterval(timerInterval);
+  activeTimerCompleted = true;
+  activeTimerEnd = null;
+  timerDisplay.textContent = '05:00';
+  timerMsg.textContent = '';
+  startTimerBtn.disabled = false;
+});
+
+// ---------- Brain dump ----------
+let dumpInterval = null;
+const dumpTimerEl = document.getElementById('dumpTimer');
+const dumpArea = document.getElementById('dumpArea');
+
+document.getElementById('startDumpBtn').addEventListener('click', ()=>{
+  clearInterval(dumpInterval);
+  let remaining = 10*60;
+  dumpTimerEl.textContent = formatTime(remaining);
+  dumpArea.focus();
+  dumpInterval = setInterval(()=>{
+    remaining--;
+    dumpTimerEl.textContent = formatTime(remaining);
+    if(remaining<=0){
+      clearInterval(dumpInterval);
+      dumpArea.value = '';
+      beep();
+      dumpTimerEl.textContent = '10:00';
+      recordActivity('dump');
+      showCelebrate('تم تفريغ الأفكار ومسحها. المهم أن البدء حصل.');
+    }
+  },1000);
+});
+
+document.getElementById('clearDumpBtn').addEventListener('click', ()=>{
+  clearInterval(dumpInterval);
+  dumpArea.value = '';
+  dumpTimerEl.textContent = '10:00';
+});
+
+// ---------- Done counter ----------
+const doneCountEl = document.getElementById('doneCount');
+const doneListEl = document.getElementById('doneList');
+
+function renderDone(){
+  doneCountEl.textContent = appData.doneToday.length;
+  doneListEl.innerHTML = '';
+  appData.doneToday.slice().reverse().forEach(item=>{
+    const li = document.createElement('li');
+    li.innerHTML = `<span>${item.text}</span><span class="time">${item.time}</span>`;
+    doneListEl.appendChild(li);
+  });
+}
+
+function addDone(){
+  const input = document.getElementById('doneInput');
+  const text = input.value.trim() || 'مهمة صغيرة منجزة';
+  const time = new Date().toLocaleTimeString('ar', {hour:'2-digit', minute:'2-digit'});
+  appData.doneToday.push({text, time});
+  appData.doneLog.push({date: getDateStr(), text, time});
+  if(appData.doneLog.length > 300) appData.doneLog.shift();
+  saveData();
+  input.value = '';
+  renderDone();
+  recordActivity('done');
+  showCelebrate('تم التسجيل. الإنجاز أفضل من الكمال.');
+}
+
+document.getElementById('doneAddBtn').addEventListener('click', addDone);
+document.getElementById('doneInput').addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter') addDone();
+});
+
+// ---------- Random action mode ----------
+document.getElementById('pickRandomBtn').addEventListener('click', ()=>{
+  const slots = [
+    document.getElementById('slot1').value.trim(),
+    document.getElementById('slot2').value.trim(),
+    document.getElementById('slot3').value.trim()
+  ].filter(Boolean);
+
+  if(slots.length === 0){
+    alert('أدخل مهمة واحدة على الأقل.');
+    return;
+  }
+
+  const chosen = slots[Math.floor(Math.random()*slots.length)];
+  document.getElementById('chosenTask').textContent = chosen;
+  document.getElementById('chosenBox').classList.add('show');
+
+  const rDisplay = document.getElementById('randomTimerDisplay');
+  const rControls = document.getElementById('randomTimerControls');
+  rDisplay.style.display = 'block';
+  rControls.style.display = 'flex';
+
+  const randomStartedAt = new Date();
+  startTimer(5*60, rDisplay, ()=>{
+    openTimeLogModal(chosen, randomStartedAt);
+  });
+});
+
+document.getElementById('resetRandomBtn').addEventListener('click', ()=>{
+  clearInterval(timerInterval);
+  activeTimerCompleted = true;
+  activeTimerEnd = null;
+  document.getElementById('randomTimerDisplay').textContent = '05:00';
+  document.getElementById('chosenBox').classList.remove('show');
+});
+
+// ---------- Reframe ----------
+let reframeData = {};
+
+function switchTab(tabId){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.card').forEach(c=>c.classList.remove('active'));
+  document.querySelector(`.tab-btn[data-tab="${tabId}"]`).classList.add('active');
+  document.getElementById(tabId).classList.add('active');
+}
+
+function resetReframeFlow(){
+  document.getElementById('reframeA1').value = '';
+  document.getElementById('reframeA3').value = '';
+  document.querySelectorAll('.reframe-choice').forEach(b=>b.classList.remove('selected'));
+  document.getElementById('reframeStep1').style.display = 'block';
+  document.getElementById('reframeStep2').style.display = 'none';
+  document.getElementById('reframeStep3').style.display = 'none';
+  reframeData = {};
+}
+
+document.getElementById('reframeNext1').addEventListener('click', ()=>{
+  const v = document.getElementById('reframeA1').value.trim();
+  if(!v){ alert('اكتب إجابة قصيرة، حتى لو غير مكتملة.'); return; }
+  reframeData.worst = v;
+  document.getElementById('reframeSummary1').textContent = `الإجابة السابقة: ${v}`;
+  document.getElementById('reframeStep1').style.display = 'none';
+  document.getElementById('reframeStep2').style.display = 'block';
+});
+
+document.querySelectorAll('.reframe-choice').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.reframe-choice').forEach(b=>b.classList.remove('selected'));
+    btn.classList.add('selected');
+    reframeData.cope = btn.dataset.choice;
+    document.getElementById('reframeSummary2').textContent = `الإجابة السابقة: ${btn.dataset.choice}`;
+    document.getElementById('reframeStep2').style.display = 'none';
+    document.getElementById('reframeStep3').style.display = 'block';
+  });
+});
+
+document.getElementById('reframeFinish').addEventListener('click', ()=>{
+  const v = document.getElementById('reframeA3').value.trim();
+  if(!v){ alert('اكتب خطوة صغيرة واحدة للمتابعة.'); return; }
+  reframeData.step = v;
+  recordActivity('reframe');
+  switchTab('timer');
+  document.getElementById('timerTask').value = v;
+  resetReframeFlow();
+  startTimerBtn.click();
+});
+
+// ---------- Achievements gallery ----------
+let lastGalleryItem = null;
+
+function daysAgoLabel(dateStr){
+  const d = new Date(dateStr + 'T00:00:00');
+  const today = new Date(getDateStr() + 'T00:00:00');
+  const diff = Math.round((today - d) / 86400000);
+  if(diff <= 0) return 'اليوم';
+  if(diff === 1) return 'قبل يوم واحد';
+  if(diff === 2) return 'قبل يومين';
+  if(diff <= 10) return `قبل ${diff} أيام`;
+  return `قبل ${diff} يومًا`;
+}
+
+function showRandomAchievement(){
+  const box = document.getElementById('galleryBox');
+  const log = appData.doneLog;
+  if(!log || log.length === 0){
+    box.innerHTML = '<div class="g-text">لا توجد إنجازات مسجلة بعد.</div><div class="g-date">أول تسجيل في تبويب "إنجاز اليوم" هو البداية.</div>';
+    return;
+  }
+  let idx = Math.floor(Math.random() * log.length);
+  if(log.length > 1 && log[idx] === lastGalleryItem){
+    idx = (idx + 1) % log.length;
+  }
+  const item = log[idx];
+  lastGalleryItem = item;
+  box.innerHTML = `<div class="g-text">${item.text}</div><div class="g-date">${daysAgoLabel(item.date)}</div>`;
+}
+
+document.getElementById('galleryShuffle').addEventListener('click', showRandomAchievement);
+
+// ---------- Reminders ----------
+function renderReminderTimes(){
+  const listEl = document.getElementById('reminderTimesList');
+  listEl.innerHTML = '';
+  if(appData.reminders.times.length === 0){
+    listEl.innerHTML = '<div class="timer-msg">لا توجد أوقات تذكير محددة بعد.</div>';
+    return;
+  }
+  appData.reminders.times.slice().sort().forEach(t=>{
+    const row = document.createElement('div');
+    row.className = 'reminder-time-item';
+    row.innerHTML = `<span>${t}</span><button data-time="${t}" class="remove-reminder">حذف</button>`;
+    listEl.appendChild(row);
+  });
+  listEl.querySelectorAll('.remove-reminder').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      appData.reminders.times = appData.reminders.times.filter(t=>t!==btn.dataset.time);
+      saveData();
+      renderReminderTimes();
+    });
+  });
+}
+
+function renderNotifStatus(){
+  const statusEl = document.getElementById('notifStatus');
+  if(!('Notification' in window)){
+    statusEl.textContent = 'المتصفح المستخدم لا يدعم الإشعارات.';
+    return;
+  }
+  if(Notification.permission === 'granted' && appData.reminders.enabled){
+    statusEl.textContent = 'الإشعارات مفعّلة. تصل التذكيرات أثناء بقاء هذه الصفحة مفتوحة.';
+  } else if(Notification.permission === 'denied'){
+    statusEl.textContent = 'إذن الإشعارات مرفوض من إعدادات المتصفح.';
+  } else {
+    statusEl.textContent = 'الإشعارات غير مفعّلة بعد.';
+  }
+}
+
+document.getElementById('enableNotifBtn').addEventListener('click', ()=>{
+  if(!('Notification' in window)){
+    renderNotifStatus();
+    return;
+  }
+  Notification.requestPermission().then(perm=>{
+    appData.reminders.enabled = (perm === 'granted');
+    saveData();
+    renderNotifStatus();
+  });
+});
+
+document.getElementById('addReminderBtn').addEventListener('click', ()=>{
+  const val = document.getElementById('newReminderTime').value;
+  if(!val) return;
+  if(!appData.reminders.times.includes(val)){
+    appData.reminders.times.push(val);
+    saveData();
+    renderReminderTimes();
+  }
+  document.getElementById('newReminderTime').value = '';
+});
+
+function checkReminders(){
+  if(!appData.reminders.enabled) return;
+  if(!('Notification' in window) || Notification.permission !== 'granted') return;
+  const today = getDateStr();
+  if(appData.reminders.firedDate !== today){
+    appData.reminders.firedDate = today;
+    appData.reminders.firedTimes = [];
+  }
+  const now = new Date();
+  const current = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  if(appData.reminders.times.includes(current) && !appData.reminders.firedTimes.includes(current)){
+    appData.reminders.firedTimes.push(current);
+    saveData();
+    new Notification('خطوة عمياء', { body: 'وقت خطوة صغيرة الآن. لا حاجة لأن تكون مثالية، فقط بداية.' });
+  }
+}
+setInterval(checkReminders, 20000);
+
+// ---------- Time log ----------
+const CATEGORY_KEYWORDS = {
+  'قراءة': ['قراءة', 'كتاب', 'قرأت', 'اقرأ'],
+  'رياضة': ['رياضة', 'مشي', 'حديد', 'جيم', 'تمرين', 'جري', 'ركض', 'سباحة'],
+  'كتابة': ['كتابة', 'كتبت', 'أكتب'],
+  'عمل': ['عمل', 'شغل', 'مشروع', 'اجتماع'],
+  'دراسة': ['دراسة', 'مذاكرة', 'محاضرة']
+};
+const BASE_CATEGORIES = ['قراءة', 'رياضة', 'كتابة', 'عمل', 'دراسة'];
+
+function getAllCategories(){
+  return [...BASE_CATEGORIES, ...appData.customCategories];
+}
+
+function detectCategory(text){
+  if(!text) return 'أخرى';
+  for(const cat in CATEGORY_KEYWORDS){
+    if(CATEGORY_KEYWORDS[cat].some(k => text.includes(k))) return cat;
+  }
+  return 'أخرى';
+}
+
+function buildClockTicks(){
+  const g = document.getElementById('tlTicks');
+  if(!g) return;
+  for(let i=0; i<12; i++){
+    const angle = i * 30 * Math.PI / 180;
+    const x1 = 100 + 80 * Math.sin(angle);
+    const y1 = 100 - 80 * Math.cos(angle);
+    const x2 = 100 + 90 * Math.sin(angle);
+    const y2 = 100 - 90 * Math.cos(angle);
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', x1); line.setAttribute('y1', y1);
+    line.setAttribute('x2', x2); line.setAttribute('y2', y2);
+    line.setAttribute('class', 'tl-tick');
+    g.appendChild(line);
+  }
+}
+
+function updateClockHands(hh, mm){
+  const hourAngle = (hh % 12) * 30 + mm * 0.5;
+  const minuteAngle = mm * 6;
+  document.getElementById('tlHourHand').setAttribute('transform', `rotate(${hourAngle} 100 100)`);
+  document.getElementById('tlMinuteHand').setAttribute('transform', `rotate(${minuteAngle} 100 100)`);
+}
+
+function updateClockHandsFromInput(){
+  const val = document.getElementById('tlEndTime').value;
+  if(!val) return;
+  const [hh, mm] = val.split(':').map(Number);
+  updateClockHands(hh, mm);
+}
+
+function formatHHMM(d){
+  return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+
+function renderCategoryChips(preselect){
+  const container = document.getElementById('tlCategories');
+  container.innerHTML = '';
+
+  getAllCategories().forEach(cat=>{
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'tl-chip' + (cat === preselect ? ' selected' : '');
+    chip.textContent = cat;
+    chip.addEventListener('click', ()=>{
+      document.querySelectorAll('.tl-chip').forEach(c=>c.classList.remove('selected'));
+      chip.classList.add('selected');
+      selectedCategory = cat;
+      document.getElementById('tlNewCategoryRow').style.display = 'none';
+      document.getElementById('tlCustomCategory').style.display = 'none';
+    });
+    container.appendChild(chip);
+  });
+
+  const addChip = document.createElement('button');
+  addChip.type = 'button';
+  addChip.className = 'tl-chip tl-chip-add';
+  addChip.textContent = '+ إضافة فئة';
+  addChip.addEventListener('click', ()=>{
+    document.getElementById('tlNewCategoryRow').style.display = 'flex';
+    document.getElementById('tlNewCategoryInput').value = '';
+    document.getElementById('tlNewCategoryInput').focus();
+  });
+  container.appendChild(addChip);
+
+  const otherChip = document.createElement('button');
+  otherChip.type = 'button';
+  otherChip.className = 'tl-chip' + (preselect === 'أخرى' ? ' selected' : '');
+  otherChip.textContent = 'أخرى';
+  otherChip.addEventListener('click', ()=>{
+    document.querySelectorAll('.tl-chip').forEach(c=>c.classList.remove('selected'));
+    otherChip.classList.add('selected');
+    selectedCategory = 'أخرى';
+    document.getElementById('tlNewCategoryRow').style.display = 'none';
+    document.getElementById('tlCustomCategory').style.display = 'block';
+  });
+  container.appendChild(otherChip);
+
+  selectedCategory = preselect;
+  document.getElementById('tlNewCategoryRow').style.display = 'none';
+  document.getElementById('tlCustomCategory').style.display = (preselect === 'أخرى') ? 'block' : 'none';
+  document.getElementById('tlCustomCategory').value = '';
+}
+
+document.getElementById('tlConfirmNewCategoryBtn').addEventListener('click', ()=>{
+  const name = document.getElementById('tlNewCategoryInput').value.trim();
+  if(!name) return;
+  if(!appData.customCategories.includes(name) && !BASE_CATEGORIES.includes(name)){
+    appData.customCategories.push(name);
+    saveData();
+  }
+  renderCategoryChips(name);
+});
+
+let selectedCategory = 'أخرى';
+let timelogContext = null;
+
+function openTimeLogModal(taskText, startedAt){
+  timelogContext = { taskText, startedAt };
+  document.getElementById('tlTaskLabel').textContent = taskText ? `المهمة: ${taskText}` : 'مهمة بدون عنوان';
+  document.getElementById('tlStartVal').textContent = formatHHMM(startedAt);
+  const now = new Date();
+  document.getElementById('tlEndTime').value = formatHHMM(now);
+  renderCategoryChips(detectCategory(taskText));
+  updateClockHandsFromInput();
+  document.getElementById('timelogModal').classList.add('show');
+}
+
+function closeTimelogModal(){
+  document.getElementById('timelogModal').classList.remove('show');
+  document.getElementById('timerTask').value = '';
+}
+
+function computeMinutes(startedAt, endTimeStr){
+  const [eh, em] = endTimeStr.split(':').map(Number);
+  const end = new Date(startedAt);
+  end.setHours(eh, em, 0, 0);
+  if(end < startedAt) end.setDate(end.getDate() + 1);
+  let diffMin = Math.round((end - startedAt) / 60000);
+  if(diffMin < 1) diffMin = 1;
+  return diffMin;
+}
+
+function saveTimeLogEntry(text, category, minutes){
+  appData.timeLog.push({ date: getDateStr(), text: text || 'بدون عنوان', category, minutes });
+  if(appData.timeLog.length > 500) appData.timeLog.shift();
+  saveData();
+  recordActivity('timer');
+  renderTimeCategories();
+  const hoursNote = minutes >= 60 ? `${(minutes/60).toFixed(1)} ساعة` : `${minutes} دقيقة`;
+  showCelebrate(`تم تسجيل ${hoursNote} ضمن فئة: ${category}`);
+}
+
+document.getElementById('tlEndTime').addEventListener('input', updateClockHandsFromInput);
+
+document.getElementById('tlSkipBtn').addEventListener('click', ()=>{
+  const category = detectCategory(timelogContext.taskText);
+  saveTimeLogEntry(timelogContext.taskText, category, 5);
+  closeTimelogModal();
+});
+
+document.getElementById('tlSaveBtn').addEventListener('click', ()=>{
+  const endVal = document.getElementById('tlEndTime').value || formatHHMM(new Date());
+  const minutes = computeMinutes(timelogContext.startedAt, endVal);
+  let category = selectedCategory || 'أخرى';
+  if(category === 'أخرى'){
+    const custom = document.getElementById('tlCustomCategory').value.trim();
+    if(custom) category = custom;
+  }
+  saveTimeLogEntry(timelogContext.taskText, category, minutes);
+  closeTimelogModal();
+});
+
+document.getElementById('tlCancelBtn').addEventListener('click', ()=>{
+  closeTimelogModal();
+});
+
+function renderTimeCategories(){
+  const container = document.getElementById('categoryStats');
+  const totals = {};
+  appData.timeLog.forEach(e=>{
+    totals[e.category] = (totals[e.category] || 0) + e.minutes;
+  });
+  const entries = Object.entries(totals).sort((a,b)=>b[1]-a[1]);
+  if(entries.length === 0){
+    container.innerHTML = '<div class="timer-msg">لا يوجد وقت مسجل بعد. سجّل من مؤقت 5 دقائق أو الاختيار العشوائي.</div>';
+    return;
+  }
+  container.innerHTML = '';
+  entries.forEach(([cat, minutes])=>{
+    const hours = minutes / 60;
+    const label = hours >= 1 ? `${hours.toFixed(1)} ساعة` : `${minutes} دقيقة`;
+    const box = document.createElement('div');
+    box.className = 'stat-box';
+    box.innerHTML = `<div class="num">${label}</div><div class="lbl">${cat}</div>`;
+    container.appendChild(box);
+  });
+}
+
+// ---------- Init ----------
+renderDone();
+renderStreakBadge();
+renderAchievements();
+showRandomAchievement();
+renderReminderTimes();
+renderNotifStatus();
+buildClockTicks();
+renderTimeCategories();
+</script>
+
+</body>
+</html>
